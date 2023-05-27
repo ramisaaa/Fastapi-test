@@ -1,11 +1,14 @@
 from fastapi import FastAPI, File, UploadFile
-import pandas as pd
 from starlette.responses import JSONResponse
+import pandas as pd
 import uuid
+import os
+import shutil
 
 app = FastAPI()
 
 datasets = {}
+UPLOAD_FOLDER = "uploads"
 
 
 @app.get("/")
@@ -15,16 +18,22 @@ async def root():
 
 @app.get("/datasets/")
 def list_datasets():
-    return {"datasets": list(datasets)}
+    return {"datasets": list(datasets.keys())}
 
 
 @app.post("/datasets/")
 async def create_dataset(file: UploadFile = File(...)):
     try:
-        # Read uploaded csv file and store it as a pandas dataframe
-        df = pd.read_csv(file.file)
+        # create the defined upload folder if it does not exist
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
         # Generate a unique ID for the dataset
-        dataset_id = uuid.uuid1()
+        dataset_id = uuid.uuid4()
+        file_name = f"{dataset_id.hex}.csv"
+        file_path = os.path.join(UPLOAD_FOLDER, file_name)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        # Read CSV file and store it as a pandas dataframe
+        df = pd.read_csv(file_path)
         # Store the dataset in memory
         datasets[dataset_id] = df
         return {"dataset_id": dataset_id}
