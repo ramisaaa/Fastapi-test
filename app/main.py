@@ -18,7 +18,12 @@ async def root():
 
 @app.get("/datasets/")
 def list_datasets():
-    return {"datasets": list(datasets.keys())}
+    file_lists = []
+    for file_name in os.listdir(UPLOAD_FOLDER):
+        file_path = os.path.join(UPLOAD_FOLDER, file_name)
+        if os.path.isfile(file_path):
+            file_lists.append(file_name)
+    return {"datasets": file_lists}
 
 
 @app.post("/datasets/")
