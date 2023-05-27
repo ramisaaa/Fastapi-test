@@ -2,6 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from pydantic import BaseModel
+import matplotlib.pyplot as plt
 import pandas as pd
 import uuid
 import os
@@ -114,3 +115,29 @@ async def get_stats(id: str):
         return JSONResponse(status_code=404, content={"error": "dataset file not found"})
 
 
+@app.get("/datasets/{id}/plots/")
+async def generate_plots(id: str):
+    file_path = os.path.join(UPLOAD_FOLDER, f"{id}.csv")
+    # check if the file exists
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        df = pd.read_csv(file_path)
+        # first check for all the numerical columns
+        numerical_columns = df.select_dtypes(include=['int64', 'float64']).columns
+
+        # Generate histograms
+        fig, axes = plt.subplots(len(numerical_columns), 1, figsize=(8, 4 * len(numerical_columns)))
+        for i, column in enumerate(numerical_columns):
+            ax = axes[i]
+            ax.hist(df[column], bins=10)
+            ax.set_xlabel(column)
+            ax.set_ylabel('Frequency')
+
+        # Save the plot as a PDF
+        plot_path = os.path.join(UPLOAD_FOLDER, f"{id}_histograms.pdf")
+        plt.tight_layout()
+        plt.savefig(plot_path)
+        plt.close()
+
+        return FileResponse(plot_path, media_type='application/pdf')
+    else:
+        return JSONResponse(status_code=404, content={"error": "dataset file not found"})
