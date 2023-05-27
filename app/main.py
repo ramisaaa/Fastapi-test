@@ -44,3 +44,15 @@ async def create_dataset(file: UploadFile = File(...)):
         return {"dataset_id": dataset_id}
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": str(e)})
+
+
+@app.get("/datasets/{id}")
+async def get_dataset_info(id: str):
+    file_name = f"{id}.csv"
+    file_path = os.path.join(UPLOAD_FOLDER, file_name)
+    # check if the given id is a file or not
+    if not os.path.isfile(file_path):
+        return JSONResponse(status_code=404, content={"error": "dataset file not found"})
+
+    file_size = os.path.getsize(file_path)
+    return {"file_name": file_name, "file_size": file_size}
