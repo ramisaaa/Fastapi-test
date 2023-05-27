@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from pydantic import BaseModel
 import pandas as pd
@@ -86,3 +87,30 @@ async def remove_dataset(id: str):
         return JSONResponse(status_code=200, content={"success": "dataset removed"})
     else:
         return JSONResponse(status_code=404, content={"error": "dataset file not found"})
+
+
+@app.get("/datasets/{id}/excel/")
+async def export_dataset_excel(id: str):
+    file_path = os.path.join(UPLOAD_FOLDER, f"{id}.csv")
+    # check if the file exists
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        df = pd.read_csv(file_path)
+        excel_path = os.path.join(UPLOAD_FOLDER, f"{id}.xlsx")
+        df.to_excel(excel_path)
+        return FileResponse(excel_path)
+    else:
+        return JSONResponse(status_code=404, content={"error": "dataset file not found"})
+
+
+@app.get("/datasets/{id}/stats/")
+async def get_stats(id: str):
+    file_path = os.path.join(UPLOAD_FOLDER, f"{id}.csv")
+    # check if the file exists
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        df = pd.read_csv(file_path)
+        stats = df.describe()
+        return stats
+    else:
+        return JSONResponse(status_code=404, content={"error": "dataset file not found"})
+
+
