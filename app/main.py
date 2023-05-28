@@ -7,6 +7,7 @@ import pandas as pd
 import uuid
 import os
 import shutil
+import glob
 
 app = FastAPI()
 
@@ -28,13 +29,12 @@ async def root():
 @app.get("/datasets/")
 def list_datasets():
     datasets = []
-
-    for file in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, file)
+    csv_files = glob.glob(os.path.join(UPLOAD_FOLDER, "*.csv"))
+    for file_path in csv_files:
         if os.path.isfile(file_path):
             dataset = Dataset(
-                id=str(file.split('.')[0]),
-                filename=file,
+                id=str(os.path.basename(file_path).split('.')[0]),
+                filename=os.path.basename(file_path),
                 size=os.path.getsize(file_path)
             )
             datasets.append(dataset)
