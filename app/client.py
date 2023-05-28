@@ -65,8 +65,8 @@ if args.info:
 if args.excel:
     dataset_id = args.excel
     response = requests.get(f"{BASE_URL}/datasets/{dataset_id}/excel/")
-    if response.status_code == 200 and response.headers.get('content-type') == 'application/pdf':
-        with open(f"{dataset_id}_dataset.xlsx", 'wb') as file:
+    if response.status_code == 200:
+        with open(f"{dataset_id}.xlsx", 'wb') as file:
             file.write(response.content)
         print("Dataset exported to Excel successfully.")
     else:
@@ -85,8 +85,8 @@ if args.stats:
 
 if args.plot:
     dataset_id = args.plot
-    response = requests.get(f"{BASE_URL}/datasets/{dataset_id}/plot/")
-    if response.status_code == 200 and response.headers.get('content-type') == 'application/pdf':
+    response = requests.get(f"{BASE_URL}/datasets/{dataset_id}/plots/")
+    if response.status_code == 200:
         with open(f"{dataset_id}_histograms.pdf", 'wb') as file:
             file.write(response.content)
         print("Histograms generated and saved as PDF successfully.")
