@@ -40,13 +40,7 @@ def test_create_dataset():
 def test_get_dataset_info():
     # Create a sample CSV file for testing
     temp_csv_file = "test_dataset.csv"
-    with open(temp_csv_file, "w") as f:
-        f.write("col1,col2\nvalue1,value2\n")
-
-    with open(temp_csv_file, "rb") as csv_file:
-        res = client.post("/datasets/", files={"file": csv_file})
-        res_json = res.json()
-        id=res_json['id']
+    id = create_sample()
 
     response = client.get(f"/datasets/{id}")
     assert response.status_code == 200
@@ -60,3 +54,28 @@ def test_get_dataset_info():
 
     # remove test CSV file
     os.remove(temp_csv_file)
+
+
+def test_remove_dataset():
+    # Create a sample CSV file for testing
+    temp_csv_file = "test_dataset.csv"
+    id = create_sample()
+
+    # Send a DELETE request to remove the dataset
+    response = client.delete(f"/datasets/{id}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "success" in data
+    assert data["success"] == "dataset removed"
+
+
+def create_sample():
+    temp_csv_file = "test_dataset.csv"
+    with open(temp_csv_file, "w") as f:
+        f.write("col1,col2\nvalue1,value2\n")
+    with open(temp_csv_file, "rb") as csv_file:
+        res = client.post("/datasets/", files={"file": csv_file})
+        res_json = res.json()
+        id = res_json['id']
+    return id
