@@ -21,11 +21,6 @@ class Dataset(BaseModel):
     size: int
 
 
-@app.get("/")
-async def root():
-    return "Ramisa Heidari :)"
-
-
 @app.get("/datasets/")
 def list_datasets():
     datasets = []
