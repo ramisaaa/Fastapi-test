@@ -108,6 +108,21 @@ def test_get_stats():
     # Clean up the temporary CSV file
     os.remove(temp_csv_file)
 
+
+def test_generate_plots():
+    # Create a sample CSV file for testing
+    temp_csv_file = "test_dataset.csv"
+    id = create_sample()
+
+    # Send a GET request to generate the plots
+    response = client.get(f"/datasets/{id}/plots/")
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/pdf"
+    assert response.headers["Content-Length"] is not None
+    assert response.content
+    os.remove(temp_csv_file)
+
+
 def create_sample():
     temp_csv_file = "test_dataset.csv"
     with open(temp_csv_file, "w") as f:
