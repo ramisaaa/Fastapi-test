@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from .main import app
 import os
+import pytest
 
 client = TestClient(app)
 
@@ -89,10 +90,28 @@ def test_export_dataset_excel():
     os.remove(temp_csv_file)
 
 
+def test_get_stats():
+    # Create a sample CSV file for testing
+    temp_csv_file = "test_dataset.csv"
+    id = create_sample()
+
+    # Send a GET request to retrieve the dataset stats
+    response = client.get(f"/datasets/{id}/stats/")
+
+    assert response.status_code == 200
+    stats = response.json()
+    assert stats["col1"]["count"] == 3
+    assert stats["col2"]["mean"] == pytest.approx(4.0, abs=1e-2)
+    assert stats["col2"]["25%"] == 3
+    assert stats["col1"]["25%"] == 2
+
+    # Clean up the temporary CSV file
+    os.remove(temp_csv_file)
+
 def create_sample():
     temp_csv_file = "test_dataset.csv"
     with open(temp_csv_file, "w") as f:
-        f.write("col1,col2\nvalue1,value2\n")
+        f.write("col1,col2\n1,2\n3,4\n5,6\n")
     with open(temp_csv_file, "rb") as csv_file:
         res = client.post("/datasets/", files={"file": csv_file})
         res_json = res.json()
