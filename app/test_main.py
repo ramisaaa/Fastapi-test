@@ -69,6 +69,25 @@ def test_remove_dataset():
     assert "success" in data
     assert data["success"] == "dataset removed"
 
+    os.remove(temp_csv_file)
+
+
+def test_export_dataset_excel():
+    # Create a sample CSV file for testing
+    temp_csv_file = "test_dataset.csv"
+    id = create_sample()
+
+    # request to export the dataset as an Excel file
+    response = client.get(f"/datasets/{id}/excel/")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    # Verify that the response content is not empty
+    assert response.content
+
+    # Clean up the temporary files
+    os.remove(temp_csv_file)
+
 
 def create_sample():
     temp_csv_file = "test_dataset.csv"
