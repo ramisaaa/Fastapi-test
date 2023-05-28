@@ -22,7 +22,7 @@ class Dataset(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return "Ramisa Heidari :)"
 
 
 @app.get("/datasets/")
